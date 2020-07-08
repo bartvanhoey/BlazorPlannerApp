@@ -1,9 +1,11 @@
 @page "/auth/login"
 @layout AuthLayout
 @using PlannerApp.Shared.Models
+@using System.Security.Claims
 
 @inject AuthenticationService AuthenticationService
 @inject NavigationManager NavigationManager
+@inject ILocalStorageService StorageService
 
 <div class="row">
   <div class="col-12">
@@ -13,13 +15,6 @@
     <EditForm Model="request" OnValidSubmit="LoginUser">
      <RadzenCard>
         <AlertMessage Message="@message" MessageType="@messageType"></AlertMessage>
-
-        <ul>
-          @foreach (var item in userInfo)
-          {
-              <li>@item.Key : @item.Value </li>
-          }
-        </ul>
 
         <DataAnnotationsValidator/>
         <ValidationSummary/>
@@ -47,7 +42,6 @@
   bool isBusy = false;
   string message = string.Empty;
   AlertMessageType messageType = AlertMessageType.Success;
-  Dictionary<string, string> userInfo = new Dictionary<string, string>();
 
   public async Task LoginUser()
   {
@@ -57,7 +51,17 @@
     {
       message = "Welcome to PlannerApp";
       messageType = AlertMessageType.Success;
-      userInfo = response.UserInfo;
+      var userInfo = new LocalUserInfo
+      {
+        AccessToken = response.Message,
+        Email = response.UserInfo["Email"],
+        FirstName = response.UserInfo["FirstName"],
+        LastName = response.UserInfo["LastName"],
+        Id = response.UserInfo[ClaimTypes.NameIdentifier]
+      };
+
+    await StorageService.SetItemAsync("User", userInfo);
+
     }
     else
     {
@@ -67,7 +71,8 @@
     isBusy = false;
   }
 
-  void GotoRegister(){
+  void GotoRegister()
+  {
     NavigationManager.NavigateTo("/auth/register");
   }
 

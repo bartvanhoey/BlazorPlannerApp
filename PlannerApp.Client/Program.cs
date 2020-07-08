@@ -8,6 +8,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using PlannerApp.Shared.Services;
+using Blazored.LocalStorage;
 
 namespace PlannerApp.Client
 {
@@ -18,11 +19,15 @@ namespace PlannerApp.Client
         public static async Task Main(string[] args)
         {
             var builder = WebAssemblyHostBuilder.CreateDefault(args);
-            builder.RootComponents.Add<App>("app");
-
+           
             builder.Services.AddScoped<AuthenticationService>(s => {
                 return new AuthenticationService(URL);
             });
+
+            builder.Services.AddBlazoredLocalStorage();
+
+            builder.RootComponents.Add<App>("app");
+
 
             await builder.Build().RunAsync();
         }
