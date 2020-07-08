@@ -11,9 +11,8 @@
     </h2>
     <EditForm Model="request" OnValidSubmit="RegisterUser">
      <RadzenCard>
-       @if (!String.IsNullOrWhiteSpace(message)) {
-         <div class="alert alert-info">@message</div>
-       }
+        <AlertMessage Message="@message" MessageType="@messageType"></AlertMessage>
+
 
         <DataAnnotationsValidator/>
         <ValidationSummary/>
@@ -50,6 +49,7 @@
   RegisterRequest request = new RegisterRequest();
   bool isBusy = false;
   string message = string.Empty;
+  AlertMessageType messageType = AlertMessageType.Success;
 
   public async Task RegisterUser()
   {
@@ -58,11 +58,12 @@
     if (response.IsSuccess)
     {
       message = response.Message;
+      messageType = AlertMessageType.Success;
     }
     else
     {
-      message = response.Message;
-
+      message = response.Errors.FirstOrDefault() ?? response.Message;
+      messageType = AlertMessageType.Error;
     }
     isBusy = false;
   }
