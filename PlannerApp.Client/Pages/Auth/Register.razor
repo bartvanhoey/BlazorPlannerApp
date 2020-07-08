@@ -1,38 +1,44 @@
 @page "/auth/register"
 @layout AuthLayout
 @using PlannerApp.Shared.Models
+@inject AuthenticationService AuthenticationService
+@inject NavigationManager NavigationManager
 
 <div class="row">
   <div class="col-12">
     <h2>
       Create a new Account
     </h2>
-    <EditForm Model="model" OnValidSubmit="RegisterUser">
+    <EditForm Model="request" OnValidSubmit="RegisterUser">
      <RadzenCard>
+       @if (!String.IsNullOrWhiteSpace(message)) {
+         <div class="alert alert-info">@message</div>
+       }
+
         <DataAnnotationsValidator/>
         <ValidationSummary/>
 
         <label for="firstName">First Name</label>
-        <RadzenTextBox @bind-Value="model.FirstName"></RadzenTextBox>
+        <RadzenTextBox @bind-Value="request.FirstName"></RadzenTextBox>
 
         <label for="lastName">Last Name</label>
-        <RadzenTextBox @bind-Value="model.LastName"></RadzenTextBox>
+        <RadzenTextBox @bind-Value="request.LastName"></RadzenTextBox>
 
         <label for="emailAddress">Email</label>
-        <RadzenTextBox @bind-Value="model.Email"></RadzenTextBox>
+        <RadzenTextBox @bind-Value="request.Email"></RadzenTextBox>
 
         <label for="password">Password</label>
-        <RadzenPassword @bind-Value="model.Password"></RadzenPassword>
+        <RadzenPassword @bind-Value="request.Password"></RadzenPassword>
 
         <label for="confirmPassword">Confirm Password</label>
-        <RadzenPassword @bind-Value="model.ConfirmPassword"></RadzenPassword>
+        <RadzenPassword @bind-Value="request.ConfirmPassword"></RadzenPassword>
 
         <hr>
 
-        <RadzenButton ButtonType="Radzen.ButtonType.Submit" Text="Register" 
+        <RadzenButton ButtonType="Radzen.ButtonType.Submit" Text="Register" Disabled="isBusy"
             ButtonStyle="Radzen.ButtonStyle.Primary" class="btn-block mr-2"></RadzenButton>
 
-        <RadzenButton ButtonType="Radzen.ButtonType.Button" Text="Login" 
+        <RadzenButton ButtonType="Radzen.ButtonType.Button" Text="Login" Disabled="isBusy"
             ButtonStyle="Radzen.ButtonStyle.Secondary" class="btn-block mr-2"  ></RadzenButton>
      </RadzenCard>
 
@@ -41,11 +47,24 @@
 </div>
 
 @code{
-  RegisterRequest model = new RegisterRequest();
+  RegisterRequest request = new RegisterRequest();
+  bool isBusy = false;
+  string message = string.Empty;
 
-  public void RegisterUser()
+  public async Task RegisterUser()
   {
+    isBusy = true;
+    var response = await AuthenticationService.RegisterUserAsync(request);
+    if (response.IsSuccess)
+    {
+      message = response.Message;
+    }
+    else
+    {
+      message = response.Message;
 
+    }
+    isBusy = false;
   }
 
 }
