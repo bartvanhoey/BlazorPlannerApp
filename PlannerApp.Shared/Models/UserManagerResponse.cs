@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace PlannerApp.Shared.Models
 {
@@ -7,6 +8,7 @@ namespace PlannerApp.Shared.Models
         public string   Message { get; set; }
         public bool IsSuccess { get; set; }
         public string[] Errors { get; set; }
+        public Dictionary<string, string> UserInfo { get; set; }
         public DateTime? ExpireDate { get; set; }
     }
 }

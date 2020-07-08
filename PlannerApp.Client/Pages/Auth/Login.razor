@@ -1,0 +1,66 @@
+@page "/auth/login"
+@layout AuthLayout
+@using PlannerApp.Shared.Models
+
+@inject AuthenticationService AuthenticationService
+@inject NavigationManager NavigationManager
+
+<div class="row">
+  <div class="col-12">
+    <h2>
+      Login to your acccount
+    </h2>
+    <EditForm Model="request" OnValidSubmit="LoginUser">
+     <RadzenCard>
+        <AlertMessage Message="@message" MessageType="@messageType"></AlertMessage>
+
+
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
+
+        <label for="emailAddress">Email</label>
+        <RadzenTextBox @bind-Value="request.Email"></RadzenTextBox>
+
+        <label for="password">Password</label>
+        <RadzenPassword @bind-Value="request.Password"></RadzenPassword>
+
+        <hr>
+
+        <RadzenButton ButtonType="Radzen.ButtonType.Submit" Text="Login" Disabled="isBusy"
+            ButtonStyle="Radzen.ButtonStyle.Secondary" class="btn-block mr-2"  ></RadzenButton>
+     
+        <RadzenButton ButtonType="Radzen.ButtonType.Button" Text="Register" Disabled="isBusy"
+            ButtonStyle="Radzen.ButtonStyle.Primary" class="btn-block mr-2" Click="GotoRegister" ></RadzenButton>
+     </RadzenCard>
+    </EditForm>
+  </div>
+</div>
+
+@code{
+  LoginRequest request = new LoginRequest();
+  bool isBusy = false;
+  string message = string.Empty;
+  AlertMessageType messageType = AlertMessageType.Success;
+
+  public async Task LoginUser()
+  {
+    @* isBusy = true;
+    var response = await AuthenticationService.LoginUserAsync(request);
+    if (response.IsSuccess)
+    {
+      message = response.Message;
+      messageType = AlertMessageType.Success;
+    }
+    else
+    {
+      message = response.Errors.FirstOrDefault() ?? response.Message;
+      messageType = AlertMessageType.Error;
+    }
+    isBusy = false; *@
+  }
+
+  void GotoRegister(){
+    NavigationManager.NavigateTo("/auth/register");
+  }
+
+}
