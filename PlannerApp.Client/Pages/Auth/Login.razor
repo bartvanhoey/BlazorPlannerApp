@@ -14,6 +14,12 @@
      <RadzenCard>
         <AlertMessage Message="@message" MessageType="@messageType"></AlertMessage>
 
+        <ul>
+          @foreach (var item in userInfo)
+          {
+              <li>@item.Key : @item.Value </li>
+          }
+        </ul>
 
         <DataAnnotationsValidator/>
         <ValidationSummary/>
@@ -41,22 +47,24 @@
   bool isBusy = false;
   string message = string.Empty;
   AlertMessageType messageType = AlertMessageType.Success;
+  Dictionary<string, string> userInfo = new Dictionary<string, string>();
 
   public async Task LoginUser()
   {
-    @* isBusy = true;
+    isBusy = true;
     var response = await AuthenticationService.LoginUserAsync(request);
     if (response.IsSuccess)
     {
-      message = response.Message;
+      message = "Welcome to PlannerApp";
       messageType = AlertMessageType.Success;
+      userInfo = response.UserInfo;
     }
     else
     {
-      message = response.Errors.FirstOrDefault() ?? response.Message;
+      message = response.Message;
       messageType = AlertMessageType.Error;
     }
-    isBusy = false; *@
+    isBusy = false;
   }
 
   void GotoRegister(){
