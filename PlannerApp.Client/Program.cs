@@ -1,19 +1,13 @@
-using System;
-using System.Net.Http;
-using System.Collections.Generic;
 using System.Threading.Tasks;
-using System.Text;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using PlannerApp.Shared.Services;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
 
 namespace PlannerApp.Client
 {
-    public class Program
+  public class Program
     {
         private const string URL = "https://plannerappserver20200228091432.azurewebsites.net";
 
@@ -23,6 +17,10 @@ namespace PlannerApp.Client
            
             builder.Services.AddScoped<AuthenticationService>(s => {
                 return new AuthenticationService(URL);
+            });
+
+            builder.Services.AddScoped<PlansService>(s => {
+                return new PlansService(URL);
             });
 
             builder.Services.AddBlazoredLocalStorage();
