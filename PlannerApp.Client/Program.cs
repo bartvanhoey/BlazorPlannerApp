@@ -29,7 +29,9 @@ namespace PlannerApp.Client
 
             builder.Services.AddOptions();
             builder.Services.AddAuthorizationCore();
-            builder.Services.AddScoped<AuthenticationStateProvider, LocalAuthenticationStateProvider>();
+            builder.Services.AddScoped<LocalAuthenticationStateProvider>();
+            builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<LocalAuthenticationStateProvider>());
+
 
             builder.RootComponents.Add<App>("app");
 

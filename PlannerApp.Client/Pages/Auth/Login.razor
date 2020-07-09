@@ -6,6 +6,8 @@
 @inject AuthenticationService AuthenticationService
 @inject NavigationManager NavigationManager
 @inject ILocalStorageService StorageService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
 
 <div class="row">
   <div class="col-12">
@@ -49,8 +51,6 @@
     var response = await AuthenticationService.LoginUserAsync(request);
     if (response.IsSuccess)
     {
-      message = "Welcome to PlannerApp";
-      messageType = AlertMessageType.Success;
       var userInfo = new LocalUserInfo
       {
         AccessToken = response.Message,
@@ -61,6 +61,9 @@
       };
 
     await StorageService.SetItemAsync("User", userInfo);
+    await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    
+    NavigationManager.NavigateTo("");
 
     }
     else
