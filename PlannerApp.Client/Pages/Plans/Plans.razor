@@ -4,14 +4,23 @@
 
 @inject PlansService PlansService
 
-<h1>My Plans</h1>
-@if (isBusy) {
-  <h2>Loading plans...</h2>
+@if (string.IsNullOrWhiteSpace(Query)) 
+{
+  <h2>My Plans - Page: @PageNumber</h2>
+}
+else 
+{
+  <h2>My Plans - Results for: @Query - Page: @PageNumber</h2>
+} 
+
+@if (isBusy)
+{ 
+   <h2>Loading plans...</h2>
 }
 else
 {
   <div class="row">
-    <RadzenTextBox Placeholder="Search Query"></RadzenTextBox>
+    <RadzenTextBox Placeholder="Search Query" @bind-Value="Query"/> <RadzenButton Text="Search" Click="async () => await GetPlansAsync()" />
   </div>
   <hr>
   <div class="row">
@@ -54,7 +63,10 @@ else
 @code {
   [Parameter] public int? PageNumber { get; set; }
 
+  [Parameter] public string Query { get; set; }
+
   [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; }
+
 
   bool isBusy = false;
   List<Plan> plans = new List<Plan>();
@@ -75,19 +87,25 @@ else
 
     if (PageNumber == null) PageNumber = 1;
 
-    var response = await PlansService.GetAllPlansByPage(PageNumber.Value);
+    PlansCollectionPagingResponse response = null;
+
+    if (string.IsNullOrWhiteSpace(Query))
+      response = await PlansService.GetAllPlansByPage(PageNumber.Value);
+    else
+      response = await PlansService.SearchPlansByPage(Query, PageNumber.Value);
 
     if (response.Count % response.PageSize == 0)
-        totalPages =response.Count / response.PageSize;
+      totalPages = response.Count / response.PageSize;
     else
-      totalPages =(response.Count / response.PageSize) + 1;
+      totalPages = (response.Count / response.PageSize) + 1;
 
     plans = response.Records.ToList();
 
     isBusy = false;
   }
 
-  async Task MoveToPageAsync(int pageNumber){
+  async Task MoveToPageAsync(int pageNumber)
+  {
     PageNumber = pageNumber;
     await GetPlansAsync();
   }
