@@ -8,6 +8,7 @@
             "name": "Launch",
             "type": "blazorwasm",
             "request": "launch",
+            "timeout": 60000,
             "cwd": "${workspaceFolder}/PlannerApp.Client"
         }
     ]

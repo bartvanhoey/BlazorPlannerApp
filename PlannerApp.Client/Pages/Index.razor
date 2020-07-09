@@ -2,7 +2,14 @@
 @layout AuthLayout;
 
 
-
+@* <AuthorizeView>
+  <Authorized>
+  <h1>Welcome @context.User.FindFirst("FirstName").Value</h1>
+  </Authorized>
+  <NotAuthorized>
+    You should login
+  </NotAuthorized>
+</AuthorizeView> *@
 
 <h1>Hello, world!</h1>
 
