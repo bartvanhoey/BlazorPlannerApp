@@ -36,6 +36,15 @@ namespace PlannerApp.Shared.Services
       return response.Result;
     }
 
+    public async Task<PlanSingleResponse> PostPlanAsync(PlanRequest request)
+    {
+      var response = await client.SendFormProtectedAsync<PlanSingleResponse>($"{_baseUrl}/api/plans", ActionType.POST,
+        new StringFormKeyValue("Title", request.Title), new StringFormKeyValue("Description", request.Description), 
+        new FileFormKeyValue("CoverFile", request.CoverFile, request.FileName));
+     
+      return response.Result;
+    }
+
 
   }
 }

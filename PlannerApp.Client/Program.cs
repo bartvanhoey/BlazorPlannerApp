@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using PlannerApp.Shared.Services;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;
+using Blazor.FileReader;
 
 namespace PlannerApp.Client
 {
@@ -23,6 +24,10 @@ namespace PlannerApp.Client
                 return new PlansService(URL);
             });
 
+            builder.Services.AddFileReaderService(options => {
+                options.UseWasmSharedBuffer = true;
+            });
+
             builder.Services.AddBlazoredLocalStorage();
 
             builder.Services.AddOptions();
@@ -30,9 +35,7 @@ namespace PlannerApp.Client
             builder.Services.AddScoped<LocalAuthenticationStateProvider>();
             builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<LocalAuthenticationStateProvider>());
 
-
             builder.RootComponents.Add<App>("app");
-
 
             await builder.Build().RunAsync();
         }
