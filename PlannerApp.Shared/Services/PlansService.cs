@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using AKSoftware.WebApi.Client;
 using PlannerApp.Shared.Models;
@@ -38,13 +39,35 @@ namespace PlannerApp.Shared.Services
 
     public async Task<PlanSingleResponse> PostPlanAsync(PlanRequest request)
     {
-      var response = await client.SendFormProtectedAsync<PlanSingleResponse>($"{_baseUrl}/api/plans", ActionType.POST,
-        new StringFormKeyValue("Title", request.Title), new StringFormKeyValue("Description", request.Description), 
-        new FileFormKeyValue("CoverFile", request.CoverFile, request.FileName));
-     
+     var formKeyValues = new List<FormKeyValue>{
+        new StringFormKeyValue("Title", request.Title),
+        new StringFormKeyValue("Description", request.Description),
+      };
+
+      if (request.CoverFile != null) formKeyValues.Add(new FileFormKeyValue("CoverFile", request.CoverFile, request.FileName));
+      var response = await client.SendFormProtectedAsync<PlanSingleResponse>($"{_baseUrl}/api/plans", ActionType.POST, formKeyValues.ToArray());
+      return response.Result;
+    }
+
+    public async Task<PlanSingleResponse> GetPlanByIdAsync(string id)
+    {
+      var response = await client.GetProtectedAsync<PlanSingleResponse>($"{_baseUrl}/api/plans/{id}");
       return response.Result;
     }
 
 
+    public async Task<PlanSingleResponse> EditPlanAsync(PlanRequest request)
+    {
+      var formKeyValues = new List<FormKeyValue>{
+        new StringFormKeyValue("ID", request.Id),
+        new StringFormKeyValue("Title", request.Title),
+        new StringFormKeyValue("Description", request.Description),
+      };
+
+      if (request.CoverFile != null) formKeyValues.Add(new FileFormKeyValue("CoverFile", request.CoverFile, request.FileName));
+      var response = await client.SendFormProtectedAsync<PlanSingleResponse>($"{_baseUrl}/api/plans", ActionType.PUT, formKeyValues.ToArray());
+
+      return response.Result;
+    }
   }
 }
