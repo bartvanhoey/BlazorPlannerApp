@@ -27,32 +27,33 @@
   </div>
   <div class="col-6">
     <RadzenCard>
-end      <h2>Plan's TodoItems</h2>
-      <EditForm Model="todoItemRequest" OnValidSubmit="async ()=> await AddTodoItemFormAsync()">
+      <h2>Plan's TodoItems</h2>
+      <EditForm Model="todoItemRequest" OnValidSubmit="async ()=> await SubmitTodoItemFormAsync()">
         <DataAnnotationsValidator/>
         <ValidationSummary/>
           <table>
             <tr>
               <td>
-                <RadzenButton Text="*" Disabled="isBusy" ButtonStyle="Radzen.ButtonStyle.Info" ButtonType="Radzen.ButtonType.Button"></RadzenButton>
+                <RadzenButton Text="*" Disabled="isBusy" Click="ClearSelection" ButtonStyle="Radzen.ButtonStyle.Info" ButtonType="Radzen.ButtonType.Button"></RadzenButton>
               </td>
               <td>
                 <RadzenTextBox Placeholder="Todo item description..." @bind-Value="todoItemRequest.Description" />
               </td>
               <td>
-                <RadzenButton Text="Add" Disabled="isBusy" ButtonStyle="Radzen.ButtonStyle.Primary" ButtonType="Radzen.ButtonType.Submit"></RadzenButton>
+                <RadzenButton Text="Submit" Disabled="isBusy" ButtonStyle="Radzen.ButtonStyle.Primary" ButtonType="Radzen.ButtonType.Submit"></RadzenButton>
               </td>
             </tr>
             @foreach (var todoItem in todoItems)
             { 
                 string descriptionStyle = todoItem.IsDone? "text-decoration-line: line-through;" : "text-decoration-line: none;";
-                <tr>
+                string rowStyle = selectedTodoItem == todoItem ? "cursor:pointer;background:lightblue" :"cursor:pointer;background:white";
+                <tr style="@rowStyle" @onclick="() => selectTodoItem(todoItem)">
                   <td>
                     <RadzenCheckBox @bind-Value="todoItem.IsDone" @onclick="async ()=> await ChangeTodoItemStatusAsync(todoItem.Id)" />
                   </td>
                   <td><span style="@descriptionStyle">@todoItem.Description</span></td>
                   <td>                
-                    <RadzenButton Text="x" ButtonStyle="Radzen.ButtonStyle.Danger" Disabled="isBusy" ButtonType="Radzen.ButtonType.Button"></RadzenButton>
+                    <RadzenButton Click="async () => await RemoveTodoItemAsync(todoItem.Id)" Text="x" ButtonStyle="Radzen.ButtonStyle.Danger" Disabled="isBusy" ButtonType="Radzen.ButtonType.Button"></RadzenButton>
                   </td>
                 </tr>
             }
@@ -93,7 +94,7 @@ end      <h2>Plan's TodoItems</h2>
     isBusy = false;
   }
 
-  async Task AddTodoItemFormAsync()
+  async Task SubmitTodoItemFormAsync()
   {
     if (selectedTodoItem == null)
     {
@@ -101,8 +102,25 @@ end      <h2>Plan's TodoItems</h2>
     }
     else
     {
+      await EditTodoItemAsync();
+    }
+  }
+
+  async Task EditTodoItemAsync()
+  {
+    isBusy = true;
+    todoItemRequest.PlanId = Id;
+    var response = await TodoItemsService.EditTodoItemAsync(todoItemRequest);
+    if (response.IsSuccess)
+    {
+      var editedTodoItem = todoItems.SingleOrDefault(x => x.Id == response.Record.Id);
+      editedTodoItem.Description = response.Record.Description;
+    }
+    else
+    {
 
     }
+    isBusy = false;
   }
 
   async Task GetPlanById()
@@ -183,14 +201,37 @@ end      <h2>Plan's TodoItems</h2>
     isBusy = false;
   }
 
-  async Task ChangeTodoItemStatusAsync(string todoItemId) {
+  async Task ChangeTodoItemStatusAsync(string todoItemId)
+  {
     isBusy = true;
     var response = await TodoItemsService.ChangeTodoItemStatusAsync(todoItemId);
-    if (!response.IsSuccess) {
+    if (!response.IsSuccess)
+    {
       // TODO
     }
     isBusy = false;
   }
 
+  void selectTodoItem(TodoItem todoItem)
+  {
+    selectedTodoItem = todoItem;
+    todoItemRequest.Id = todoItem.Id;
+    todoItemRequest.Description = todoItem.Description;
+  }
+
+
+  void ClearSelection()
+  {
+    selectedTodoItem = null;
+    todoItemRequest = null;
+  }
+
+  async Task RemoveTodoItemAsync(string id) { 
+    isBusy = true;
+
+    var response = await TodoItemsService.DeleteTodoItemStatusAsync(id);
+
+    isBusy =false;
+  }
 
 }
