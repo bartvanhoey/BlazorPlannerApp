@@ -32,21 +32,27 @@ else
             <img src="@plan.CoverPath" style="width: 90%;margin:5px;">
             <h2>@plan.Title</h2>
             <p>@plan.Description</p>
+            <hr>
             <div class="row">
               <div class="col-6">
                 <RadzenButton  ButtonStyle="Radzen.ButtonStyle.Success" Text="Edit" class="btn-block" 
                   Click='() => NavigationManager.NavigateTo($"/plans/details/{plan.Id}", true)'/>
               </div>
               <div class="col-6">
-                <RadzenButton ButtonStyle="Radzen.ButtonStyle.Danger" Text="Delete" class="btn-block" />
+                <RadzenButton isb ButtonStyle="Radzen.ButtonStyle.Danger" Click="()=> SelectPlan(plan.Id)" Text="Delete" class="btn-block" />
               </div>
             </div>
+            @if (selectedPlanId == plan.Id) {
+              <div class="row">
+                <div class="col-12">
+                  <RadzenButton ButtonStyle="Radzen.ButtonStyle.Info" Text="Confirm" Click="async ()=> await DeletePlanAsync()" class="btn-block" />
+                </div>
+              </div>  
+            }
+            
           </RadzenCard>
       </div>
     }
-
-
-    
   </div>
   <hr>
   <div class="row">
@@ -64,20 +70,21 @@ else
 
 @code {
   [Parameter] public int? PageNumber { get; set; }
-
   [Parameter] public string Query { get; set; }
-
   [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; }
-
-
   bool isBusy = false;
+  string selectedPlanId = string.Empty;
   List<Plan> plans = new List<Plan>();
-
   int totalPages = 1;
 
   protected override async Task OnInitializedAsync()
   {
     await GetPlansAsync();
+  }
+
+  void SelectPlan(string id)
+  {
+    selectedPlanId = id;
   }
 
   public async Task GetPlansAsync()
@@ -110,6 +117,21 @@ else
   {
     PageNumber = pageNumber;
     await GetPlansAsync();
+  }
+
+  async Task DeletePlanAsync()
+  {
+    isBusy = true;
+    var response = await PlansService.DeletePlanAsync(selectedPlanId);
+    if (response.IsSuccess)
+    {
+      plans.Remove(plans.FirstOrDefault(x => x.Id == selectedPlanId));
+    }
+    else
+    {
+      await GetPlansAsync();
+    }
+    isBusy = false;
   }
 
 

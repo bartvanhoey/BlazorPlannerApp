@@ -39,7 +39,7 @@ namespace PlannerApp.Shared.Services
 
     public async Task<PlanSingleResponse> PostPlanAsync(PlanRequest request)
     {
-     var formKeyValues = new List<FormKeyValue>{
+      var formKeyValues = new List<FormKeyValue>{
         new StringFormKeyValue("Title", request.Title),
         new StringFormKeyValue("Description", request.Description),
       };
@@ -67,6 +67,12 @@ namespace PlannerApp.Shared.Services
       if (request.CoverFile != null) formKeyValues.Add(new FileFormKeyValue("CoverFile", request.CoverFile, request.FileName));
       var response = await client.SendFormProtectedAsync<PlanSingleResponse>($"{_baseUrl}/api/plans", ActionType.PUT, formKeyValues.ToArray());
 
+      return response.Result;
+    }
+
+    public async Task<PlanSingleResponse> DeletePlanAsync(string id)
+    {
+      var response = await client.DeleteProtectedAsync<PlanSingleResponse>($"{_baseUrl}/api/plans/{id}");
       return response.Result;
     }
   }
