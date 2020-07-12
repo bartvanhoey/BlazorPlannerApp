@@ -5,6 +5,7 @@
 @inject PlansService PlansService
 @inject NavigationManager NavigationManager
 @inject IFileReaderService FileReaderService
+@inject TodoItemsService TodoItemsService
 
 <h3>Plan @planRequest.Title</h3>
 
@@ -27,24 +28,81 @@
   <div class="col-6">
     <RadzenCard>
       <h2>Plan's Items</h2>
-    </RadzenCard>
+      <EditForm Model="todoItemRequest" OnValidSubmit="async ()=> await AddTodoItemFormAsync()">
+        <DataAnnotationsValidator/>
+        <ValidationSummary/>
+          <table>
+            <tr>
+              <td>
+                <RadzenButton Text="*" ButtonStyle="Radzen.ButtonStyle.Info" ButtonType="Radzen.ButtonType.Button"></RadzenButton>
+              </td>
+              <td>
+                <RadzenTextBox Placeholder="Todo item description..." @bind-Value="todoItemRequest.Description" />
+              </td>
+              <td>
+                <RadzenButton Text="Add" ButtonStyle="Radzen.ButtonStyle.Primary" ButtonType="Radzen.ButtonType.Submit"></RadzenButton>
+              </td>
+            </tr>
+            @foreach (var todoItem in todoItems)
+            {
+                <tr>
+                  <td>
+                    <RadzenCheckBox Value="todoItem.IsDone" />
+                  </td>
+                  <td><span>@todoItem.Description</span></td>
+                  <td>                
+                    <RadzenButton Text="x" ButtonStyle="Radzen.ButtonStyle.Danger" ButtonType="Radzen.ButtonType.Button"></RadzenButton>
+                  </td>
+                </tr>
+            }
+          </table>
+      </EditForm>
+     </RadzenCard>
   </div>
-</div>
+  </div>
 
 @code {
   PlanRequest planRequest = new PlanRequest();
+  TodoItemRequest todoItemRequest = new TodoItemRequest();
   Stream fileStream = null;
   string imageContent = string.Empty;
   string fileName = string.Empty;
   bool isBusy = false;
-
   string message = string.Empty;
   AlertMessageType messageType = AlertMessageType.Success;
-
   ElementReference inputReference;
-
   [Parameter] public string Id { get; set; }
   [CascadingParameter] private Task<AuthenticationState> AuthenticationState { get; set; }
+  List<TodoItem> todoItems = new List<TodoItem>();
+  TodoItem selectedTodoItem = null;
+
+  async Task InsertTodoItemAsync()
+  {
+    isBusy = true;
+    todoItemRequest.PlanId = Id;
+    var response = await TodoItemsService.PostTodoItemAsync(todoItemRequest);
+    if (response.IsSuccess)
+    {
+      todoItems.Add(response.Record);
+    }
+    else
+    {
+
+    }
+    isBusy = false;
+  }
+
+  async Task AddTodoItemFormAsync()
+  {
+    if (selectedTodoItem == null)
+    {
+      await InsertTodoItemAsync();
+    }
+    else
+    {
+
+    }
+  }
 
   async Task GetPlanById()
   {
@@ -56,6 +114,7 @@
       planRequest.Description = response.Record.Description;
       imageContent = response.Record.CoverPath;
       planRequest.Id = response.Record.Id;
+      todoItems = response.Record.TodoItems.ToList();
     }
     else
     {
@@ -68,11 +127,11 @@
   protected override async Task OnInitializedAsync()
   {
     var userState = AuthenticationState.Result;
-    PlansService.AccessToken = userState.User.FindFirst("AccessToken").Value;
+    PlansService.AccessToken = TodoItemsService.AccessToken = userState.User.FindFirst("AccessToken").Value;
     await GetPlanById();
   }
 
-   async Task ChooseFileAsync()
+  async Task ChooseFileAsync()
   {
     var file = (await FileReaderService.CreateReference(inputReference).EnumerateFilesAsync()).FirstOrDefault();
 
@@ -111,7 +170,7 @@
     var response = await PlansService.EditPlanAsync(planRequest);
     if (response.IsSuccess)
     {
-      message= "Plan edited successfully";
+      message = "Plan edited successfully";
       messageType = AlertMessageType.Success;
 
     }
@@ -122,4 +181,7 @@
     }
     isBusy = false;
   }
+
+
+
 }
