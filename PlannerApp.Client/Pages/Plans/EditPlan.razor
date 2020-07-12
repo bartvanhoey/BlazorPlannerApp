@@ -27,31 +27,32 @@
   </div>
   <div class="col-6">
     <RadzenCard>
-      <h2>Plan's Items</h2>
+end      <h2>Plan's TodoItems</h2>
       <EditForm Model="todoItemRequest" OnValidSubmit="async ()=> await AddTodoItemFormAsync()">
         <DataAnnotationsValidator/>
         <ValidationSummary/>
           <table>
             <tr>
               <td>
-                <RadzenButton Text="*" ButtonStyle="Radzen.ButtonStyle.Info" ButtonType="Radzen.ButtonType.Button"></RadzenButton>
+                <RadzenButton Text="*" Disabled="isBusy" ButtonStyle="Radzen.ButtonStyle.Info" ButtonType="Radzen.ButtonType.Button"></RadzenButton>
               </td>
               <td>
                 <RadzenTextBox Placeholder="Todo item description..." @bind-Value="todoItemRequest.Description" />
               </td>
               <td>
-                <RadzenButton Text="Add" ButtonStyle="Radzen.ButtonStyle.Primary" ButtonType="Radzen.ButtonType.Submit"></RadzenButton>
+                <RadzenButton Text="Add" Disabled="isBusy" ButtonStyle="Radzen.ButtonStyle.Primary" ButtonType="Radzen.ButtonType.Submit"></RadzenButton>
               </td>
             </tr>
             @foreach (var todoItem in todoItems)
-            {
+            { 
+                string descriptionStyle = todoItem.IsDone? "text-decoration-line: line-through;" : "text-decoration-line: none;";
                 <tr>
                   <td>
-                    <RadzenCheckBox Value="todoItem.IsDone" />
+                    <RadzenCheckBox @bind-Value="todoItem.IsDone" @onclick="async ()=> await ChangeTodoItemStatusAsync(todoItem.Id)" />
                   </td>
-                  <td><span>@todoItem.Description</span></td>
+                  <td><span style="@descriptionStyle">@todoItem.Description</span></td>
                   <td>                
-                    <RadzenButton Text="x" ButtonStyle="Radzen.ButtonStyle.Danger" ButtonType="Radzen.ButtonType.Button"></RadzenButton>
+                    <RadzenButton Text="x" ButtonStyle="Radzen.ButtonStyle.Danger" Disabled="isBusy" ButtonType="Radzen.ButtonType.Button"></RadzenButton>
                   </td>
                 </tr>
             }
@@ -182,6 +183,14 @@
     isBusy = false;
   }
 
+  async Task ChangeTodoItemStatusAsync(string todoItemId) {
+    isBusy = true;
+    var response = await TodoItemsService.ChangeTodoItemStatusAsync(todoItemId);
+    if (!response.IsSuccess) {
+      // TODO
+    }
+    isBusy = false;
+  }
 
 
 }
