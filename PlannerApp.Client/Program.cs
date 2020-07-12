@@ -9,35 +9,44 @@ using Blazor.FileReader;
 namespace PlannerApp.Client
 {
   public class Program
+  {
+    private const string URL = "https://plannerappserver20200228091432.azurewebsites.net";
+
+    public static async Task Main(string[] args)
     {
-        private const string URL = "https://plannerappserver20200228091432.azurewebsites.net";
+      var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
-        public static async Task Main(string[] args)
-        {
-            var builder = WebAssemblyHostBuilder.CreateDefault(args);
-           
-            builder.Services.AddScoped<AuthenticationService>(s => {
-                return new AuthenticationService(URL);
-            });
+      builder.Services.AddScoped<AuthenticationService>(s =>
+      {
+        return new AuthenticationService(URL);
+      });
 
-            builder.Services.AddScoped<PlansService>(s => {
-                return new PlansService(URL);
-            });
+      builder.Services.AddScoped<PlansService>(s =>
+      {
+        return new PlansService(URL);
+      });
 
-            builder.Services.AddFileReaderService(options => {
-                options.UseWasmSharedBuffer = true;
-            });
+      builder.Services.AddScoped<TodoItemsService>(s =>
+      {
+        return new TodoItemsService(URL);
+      });
 
-            builder.Services.AddBlazoredLocalStorage();
 
-            builder.Services.AddOptions();
-            builder.Services.AddAuthorizationCore();
-            builder.Services.AddScoped<LocalAuthenticationStateProvider>();
-            builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<LocalAuthenticationStateProvider>());
+      builder.Services.AddFileReaderService(options =>
+      {
+        options.UseWasmSharedBuffer = true;
+      });
 
-            builder.RootComponents.Add<App>("app");
+      builder.Services.AddBlazoredLocalStorage();
 
-            await builder.Build().RunAsync();
-        }
+      builder.Services.AddOptions();
+      builder.Services.AddAuthorizationCore();
+      builder.Services.AddScoped<LocalAuthenticationStateProvider>();
+      builder.Services.AddScoped<AuthenticationStateProvider>(provider => provider.GetRequiredService<LocalAuthenticationStateProvider>());
+
+      builder.RootComponents.Add<App>("app");
+
+      await builder.Build().RunAsync();
     }
+  }
 }
